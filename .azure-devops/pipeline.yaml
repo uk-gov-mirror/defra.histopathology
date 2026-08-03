@@ -14,9 +14,9 @@ parameters:
  
 resources:
   repositories:
-    - repository: DefraApiInfra
+    - repository: histopathology
       type: git
-      name: DEFRA-Common-Platform-Improvements/DEFRA-API-INFRA
+      name: DEFRA-Common-Platform-Improvements/DEFRA-HISTO
       ref: main
  
 trigger:
