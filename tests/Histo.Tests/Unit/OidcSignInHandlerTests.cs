@@ -50,6 +50,22 @@ public class OidcSignInHandlerTests
     }
 
     [Theory]
+    [InlineData(true, 1)]
+    [InlineData(false, 0)]
+    public async Task KnownUser_LogsCompletionOnlyWhenInformationIsEnabled(bool informationEnabled, int expectedLogs)
+    {
+        _logger.Setup(l => l.IsEnabled(LogLevel.Information)).Returns(informationEnabled);
+        _users.Setup(u => u.ResolveUserByEmailAsync("a.user@example.gov.uk", It.IsAny<CancellationToken>())).ReturnsAsync(ActiveUser);
+        var principal = Principal((ClaimTypes.Email, "a.user@example.gov.uk"), (ObjectIdClaim, "oid-1"));
+
+        await CreateSut().OnTokenValidatedAsync(principal);
+
+        _logger.Verify(l => l.Log(
+            LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Exactly(expectedLogs));
+    }
+
+    [Theory]
     [InlineData("email")]
     [InlineData("preferred_username")]
     public async Task UnmappedEmailOrUpnClaim_IsUsedForTheLookup(string claimType)
